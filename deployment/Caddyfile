@@ -1,0 +1,97 @@
+# Caddyfile 配置示例
+# 用于 Ubuntu 24.04 部署
+
+# ==================== 方案 A: 使用域名 + 自动 SSL ====================
+# 替换 your-domain.com 为你的实际域名
+
+your-domain.com {
+    # Caddy 会自动从 Let's Encrypt 获取 SSL 证书
+    
+    # 前端静态文件
+    root * /opt/ai-bookkeeper/frontend
+    file_server
+    
+    # API 反向代理到后端
+    # 前端请求 /api/v1/* 会被代理到后端 http://127.0.0.1:8000/v1/*
+    reverse_proxy /api/v1/* 127.0.0.1:8000 {
+        header_up Host {host}
+        header_up X-Real-IP {remote}
+        header_up X-Forwarded-For {remote}
+        header_up X-Forwarded-Proto {scheme}
+    }
+    
+    # 日志配置
+    log {
+        output file /var/log/caddy/access.log {
+            roll_size 100mb
+            roll_keep 10
+        }
+        format json
+    }
+    
+    # Gzip 压缩
+    encode gzip zstd
+    
+    # 安全头部
+    header {
+        # 启用 HSTS (强制 HTTPS)
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        
+        # 防止点击劫持
+        X-Frame-Options "SAMEORIGIN"
+        
+        # 防止 MIME 类型嗅探
+        X-Content-Type-Options "nosniff"
+        
+        # XSS 保护
+        X-XSS-Protection "1; mode=block"
+        
+        # CSP (内容安全策略)
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; img-src 'self' data:;"
+        
+        # 移除服务器信息
+        -Server
+    }
+    
+    # 静态资源缓存
+    @static {
+        path *.js *.css *.png *.jpg *.jpeg *.gif *.ico *.svg *.woff *.woff2 *.ttf *.eot
+    }
+    header @static Cache-Control "public, max-age=2592000"
+}
+
+# ==================== 方案 B: 仅 HTTP (测试用) ====================
+# 取消下面的注释以使用 HTTP 模式
+
+# :80 {
+#     # 前端静态文件
+#     root * /opt/ai-bookkeeper/frontend
+#     file_server
+#     
+#     # API 反向代理
+#     reverse_proxy /api/* 127.0.0.1:8000
+#     
+#     # 日志
+#     log {
+#         output file /var/log/caddy/access.log
+#     }
+#     
+#     # 压缩
+#     encode gzip
+# }
+
+# ==================== 方案 C: 多域名配置 ====================
+
+# www.your-domain.com {
+#     # 重定向到主域名
+#     redir https://your-domain.com{uri} permanent
+# }
+
+# api.your-domain.com {
+#     # 专门的 API 子域名
+#     reverse_proxy 127.0.0.1:8000
+#     
+#     log {
+#         output file /var/log/caddy/api-access.log
+#     }
+# }

@@ -1,0 +1,46 @@
+[Unit]
+Description=AI Bookkeeper FastAPI Application
+Documentation=https://github.com/folgercn/ai-bookkeeper
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/ai-bookkeeper
+
+# Python 虚拟环境路径
+Environment="PATH=/opt/ai-bookkeeper/venv/bin:/usr/local/bin:/usr/bin:/bin"
+
+# 从 .env 文件加载环境变量
+EnvironmentFile=/opt/ai-bookkeeper/.env
+
+# 如果需要使用代理,取消下面的注释
+# Environment="HTTP_PROXY=http://127.0.0.1:9087"
+# Environment="HTTPS_PROXY=http://127.0.0.1:9087"
+
+# 启动命令
+ExecStart=/opt/ai-bookkeeper/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 2
+
+# 重启策略
+Restart=always
+RestartSec=10
+
+# 安全设置
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/ai-bookkeeper/data
+
+# 资源限制
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# 日志
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ai-bookkeeper
+
+[Install]
+WantedBy=multi-user.target

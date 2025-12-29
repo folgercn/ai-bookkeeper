@@ -1,4 +1,9 @@
-const BASE_URL = 'http://127.0.0.1:8000/v1';
+// 使用相对路径,支持反向代理部署
+// 开发环境: 直接访问后端 http://127.0.0.1:8000/v1
+// 生产环境: 通过反向代理 /api 访问后端
+const BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://127.0.0.1:8000/v1'
+    : '/api/v1';
 
 class API {
     static getHeaders() {
