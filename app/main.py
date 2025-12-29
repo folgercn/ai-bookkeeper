@@ -21,11 +21,20 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# CORS 配置
+# 生产环境仅允许特定域名,开发环境允许所有
+if settings.APP_ENV == "production":
+    allowed_origins = [
+        "https://aibook.sunnywifi.cn",
+    ]
+else:
+    allowed_origins = ["*"]  # 开发环境
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
 

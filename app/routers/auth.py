@@ -38,29 +38,39 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 @router.post("/register", response_model=SuccessResponse)
 async def register(req: UserRegisterRequest, db: AsyncSession = Depends(get_db)):
-    # 检查用户是否存在
-    result = await db.execute(select(User).where(User.username == req.username))
-    if result.scalar_one_or_none():
-        raise HTTPException(status_code=400, detail="用户名已存在")
-    
-    user_id = str(uuid.uuid4())
-    api_key = f"fa_{secrets.token_hex(16)}"
-    
-    new_user = User(
-        id=user_id,
-        username=req.username,
-        password_hash=get_password_hash(req.password),
-        api_key=api_key
-    )
-    
-    db.add(new_user)
-    await db.commit()
-    
-    return SuccessResponse(data={
-        "user_id": user_id,
-        "username": req.username,
-        "api_key": api_key
-    })
+    """
+    注册功能暂时禁用 - 仅供个人使用
+    如需创建用户,请使用: python scripts/create_user.py
+    """
+    raise HTTPException(status_code=403, detail="注册功能已禁用,此应用仅供个人使用")
+
+# ==================== 原注册代码(已注释,可恢复) ====================
+# @router.post("/register", response_model=SuccessResponse)
+# async def register(req: UserRegisterRequest, db: AsyncSession = Depends(get_db)):
+#     # 检查用户是否存在
+#     result = await db.execute(select(User).where(User.username == req.username))
+#     if result.scalar_one_or_none():
+#         raise HTTPException(status_code=400, detail="用户名已存在")
+#     
+#     user_id = str(uuid.uuid4())
+#     api_key = f"fa_{secrets.token_hex(16)}"
+#     
+#     new_user = User(
+#         id=user_id,
+#         username=req.username,
+#         password_hash=get_password_hash(req.password),
+#         api_key=api_key
+#     )
+#     
+#     db.add(new_user)
+#     await db.commit()
+#     
+#     return SuccessResponse(data={
+#         "user_id": user_id,
+#         "username": req.username,
+#         "api_key": api_key
+#     })
+# ==================== 原注册代码结束 ====================
 
 @router.post("/login", response_model=SuccessResponse)
 async def login(req: UserLoginRequest, db: AsyncSession = Depends(get_db)):

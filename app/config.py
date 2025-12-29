@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     RATE_LIMIT_PER_MINUTE: int = 60
     API_KEY_LENGTH: int = 32
     JWT_EXPIRE_MINUTES: int = 1440
+    
+    # 个人使用限制
+    ENABLE_REGISTRATION: bool = False  # 禁用公开注册
+    MAX_USERS: int = 5  # 最大用户数限制
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
