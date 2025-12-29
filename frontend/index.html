@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Magical Accounting - AI 智能记账</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <!-- 登录注册面板 -->
+    <div id="authView" class="auth-container animate-fade-in">
+        <div class="glass-card">
+            <h2 style="margin-bottom: 24px; text-align: center;">
+                <span class="gradient-text">Magical Accounting</span>
+            </h2>
+            <div class="input-group">
+                <label class="input-label">用户名</label>
+                <input type="text" id="username" placeholder="请输入用户名">
+            </div>
+            <div class="input-group">
+                <label class="input-label">密码</label>
+                <input type="password" id="password" placeholder="请输入密码">
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button class="btn btn-primary" id="loginBtn" style="flex: 1;">登录</button>
+                <button class="btn" id="showRegisterBtn" style="flex: 1;">注册账号</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主应用面板 -->
+    <div id="appView" class="app-container">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h2 class="gradient-text">Magical AI</h2>
+            <div style="display: flex; gap: 16px;">
+                <div id="exportBtn" style="font-size: 14px; color: var(--text-muted); cursor: pointer;">
+                    <i data-lucide="download" style="width: 16px; margin-right: 4px;"></i>导出
+                </div>
+                <div id="settingsBtn" style="font-size: 14px; color: var(--text-muted); cursor: pointer;">
+                    <i data-lucide="settings" style="width: 16px; margin-right: 4px;"></i>设置
+                </div>
+                <div id="userInfo" style="font-size: 14px; color: var(--text-muted); cursor: pointer;"
+                    onclick="logout()">
+                    <i data-lucide="log-out" style="width: 16px; margin-right: 4px;"></i>退登
+                </div>
+            </div>
+        </header>
+
+        <!-- 设置面板 (默认隐藏) -->
+        <div id="settingsView" style="display: none;" class="glass-card animate-fade-in">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>⚙️ 系统设置</h3>
+                <button class="btn" id="closeSettingsBtn" style="padding: 4px 8px;">关闭</button>
+            </div>
+
+            <section style="margin-bottom: 24px;">
+                <h4 class="input-label">👨‍👩‍👧‍👦 家庭成员 (消费人)</h4>
+                <div id="payeeList" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;"></div>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="newPayeeName" placeholder="输入成员名，点击添加 (如：老婆)"
+                        style="flex: 1; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                    <button onclick="addPayee()" class="btn-primary"
+                        style="padding: 6px 12px; font-size: 12px;">添加</button>
+                </div>
+            </section>
+
+            <section>
+                <h4 class="input-label">💳 资产账户</h4>
+                <div id="assetList" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;"></div>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="newAssetName" placeholder="如：招行卡、微信">
+                    <button class="btn btn-primary" id="addAssetBtn">添加</button>
+                </div>
+            </section>
+        </div>
+
+        <div class="summary-cards animate-fade-in">
+            <div class="glass-card">
+                <p class="summary-label">本月支出</p>
+                <h2 id="monthTotal">¥ 0.00</h2>
+            </div>
+            <div class="glass-card">
+                <p class="summary-label">本年支出</p>
+                <h2 id="yearTotal">¥ 0.00</h2>
+            </div>
+        </div>
+        <!-- 记账输入区域 -->
+        <div class="glass-card animate-fade-in">
+            <div class="mode-switch">
+                <div class="mode-tab active" data-mode="text">文字</div>
+                <div class="mode-tab" data-mode="voice">语音</div>
+                <div class="mode-tab" data-mode="image">图片</div>
+            </div>
+
+            <div id="textInputArea">
+                <textarea id="mainInput" placeholder="写下你的消费，例如：昨天下午在星巴克喝了35块钱咖啡..."
+                    style="min-height: 120px;"></textarea>
+            </div>
+
+            <div id="voiceInputArea" style="display: none;">
+                <div style="text-align: center; padding: 40px;">
+                    <button id="voiceBtn" class="btn"
+                        style="width: 120px; height: 120px; border-radius: 50%; font-size: 48px;">
+                        🎤
+                    </button>
+                    <p style="margin-top: 20px; color: var(--text-muted);">点击开始录音</p>
+                    <p id="voiceStatus" style="margin-top: 10px; color: var(--primary);"></p>
+                </div>
+            </div>
+
+            <div id="imageInputArea" style="display: none;">
+                <div class="image-upload" id="dropZone"
+                    style="border: 2px dashed var(--border); border-radius: 12px; padding: 30px; text-align: center;">
+                    <i data-lucide="image"
+                        style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 12px;"></i>
+                    <p style="color: var(--text-muted);">拖拽截图到这里 或 点击上传</p>
+                    <input type="file" id="fileInput" hidden accept="image/*">
+                    <img id="imagePreview" style="display:none; max-width: 100%; margin-top: 16px; border-radius: 8px;">
+                </div>
+            </div>
+
+            <button class="btn btn-primary" id="submitBtn" style="width: 100%; margin-top: 20px; height: 48px;">
+                <i data-lucide="sparkles"></i> 智能记账
+            </button>
+        </div>
+
+        <!-- 暂存交互区域 -->
+        <div id="stagingArea" style="display: none;" class="glass-card animate-fade-in">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="font-size: 16px;">🔍 智能解析结果</h3>
+                <span id="batchIdLabel" style="font-size: 10px; color: var(--text-muted);"></span>
+            </div>
+            <div id="stagingList"></div>
+
+
+            <div class="input-group" style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <label class="input-label" style="margin-bottom: 0;">对话纠错/确认</label>
+                    <button class="btn" id="confirmAllBtn" style="padding: 6px 16px; font-size: 13px;">
+                        <i data-lucide="check-circle"></i> 全部确认
+                    </button>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="interactInput" placeholder="1金额改为50 / 删除2...">
+                    <button class="btn btn-primary" id="interactBtn"><i data-lucide="send"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 统计概览 -->
+        <div class="glass-card" style="padding: 16px;">
+            <div style="display: flex; justify-content: space-around; text-align: center;">
+                <div>
+                    <div style="font-size: 12px; color: var(--text-muted);">本日支出</div>
+                    <div id="todayTotal" style="font-size: 20px; font-weight: 800;">¥ 0.00</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: var(--text-muted);">待确认</div>
+                    <div id="pendingCount" style="font-size: 20px; font-weight: 800; color: #f59e0b;">0</div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 历史列表 -->
+        <div class="glass-card">
+            <h3 style="font-size: 16px; margin-bottom: 16px;">📊 历史记录</h3>
+
+            <!-- 筛选工具栏 -->
+            <div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
+                <input type="date" id="filterStartDate" placeholder="开始日期" style="flex: 1; min-width: 150px;">
+                <input type="date" id="filterEndDate" placeholder="结束日期" style="flex: 1; min-width: 150px;">
+                <input type="text" id="filterKeyword" placeholder="搜索关键词..." style="flex: 2; min-width: 150px;">
+                <button class="btn" id="applyFilterBtn" style="padding: 12px 20px;">
+                    <i data-lucide="search"></i> 筛选
+                </button>
+                <button class="btn" id="resetFilterBtn" style="padding: 12px 20px;">
+                    <i data-lucide="x-circle"></i> 重置
+                </button>
+            </div>
+
+            <!-- 记录列表 -->
+            <div id="expenseList"></div>
+
+            <!-- 加载更多按钮 -->
+            <div style="text-align: center; margin-top: 16px;">
+                <button class="btn" id="loadMoreBtn" style="width: 100%; display: none;">
+                    <i data-lucide="chevron-down"></i> 加载更多
+                </button>
+                <div id="loadingIndicator" style="display: none; color: var(--text-muted); padding: 16px;">
+                    加载中...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑对话框 -->
+    <div id="editModal"
+        style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div class="glass-card" style="width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="font-size: 18px;">编辑记录</h3>
+                <button id="closeEditModal"
+                    style="border: none; background: none; font-size: 24px; cursor: pointer;">×</button>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">日期</label>
+                <input type="date" id="editDate">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">金额</label>
+                <input type="number" id="editAmount" step="0.01" placeholder="0.00">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">一级分类</label>
+                <input type="text" id="editMainCategory" placeholder="餐饮">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">二级分类</label>
+                <input type="text" id="editSubCategory" placeholder="外卖">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">商户</label>
+                <input type="text" id="editPayee" placeholder="美团">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">消费人</label>
+                <input type="text" id="editConsumer" placeholder="老婆">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">备注</label>
+                <textarea id="editRemark" placeholder="备注信息" style="min-height: 60px;"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-top: 20px;">
+                <button class="btn btn-primary" id="saveEditBtn" style="flex: 1;">
+                    <i data-lucide="save"></i> 保存
+                </button>
+                <button class="btn" id="cancelEditBtn" style="flex: 1;">
+                    <i data-lucide="x"></i> 取消
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 弹窗通知 -->
+    <div id="toast"
+        style="position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 12px 24px; border-radius: 99px; font-size: 14px; display: none; z-index: 1000; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);">
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>
