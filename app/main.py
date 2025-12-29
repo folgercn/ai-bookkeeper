@@ -6,6 +6,7 @@ from app.config import settings
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import auth, config, record, expenses, export
 from app.middleware.rate_limit import RateLimitMiddleware
+from app.middleware.jwt_refresh import JWTRefreshMiddleware
 from app.utils.scheduler import cleanup_expired_staging
 
 @asynccontextmanager
@@ -44,6 +45,9 @@ app.add_middleware(
     max_requests=settings.RATE_LIMIT_PER_MINUTE,
     window_seconds=60
 )
+
+# JWT 自动续期中间件
+app.add_middleware(JWTRefreshMiddleware)
 
 # 注册路由
 app.include_router(auth.router, prefix="/v1")

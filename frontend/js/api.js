@@ -25,6 +25,16 @@ class API {
 
         try {
             const resp = await fetch(`${BASE_URL}${endpoint}`, options);
+
+            // 检查是否有新 token (JWT 自动续期)
+            const newToken = resp.headers.get('X-New-Token');
+            const tokenRefreshed = resp.headers.get('X-Token-Refreshed');
+
+            if (tokenRefreshed === 'true' && newToken) {
+                console.log('[JWT] Token 已自动续期,有效期延长3个月');
+                localStorage.setItem('api_key', newToken);
+            }
+
             const data = await resp.json();
             if (!resp.ok) throw new Error(data.error?.message || '请求失败');
             return data;

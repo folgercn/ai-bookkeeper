@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     # 安全配置
     RATE_LIMIT_PER_MINUTE: int = 60
     API_KEY_LENGTH: int = 32
-    JWT_EXPIRE_MINUTES: int = 1440
+    JWT_EXPIRE_MINUTES: int = 129600  # 3个月 (90天 * 24小时 * 60分钟)
     
     # 个人使用限制
     ENABLE_REGISTRATION: bool = False  # 禁用公开注册
